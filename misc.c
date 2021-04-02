@@ -2502,6 +2502,9 @@ opt_array_append(const char *file, const int line, const char *directive,
 sshsig_t
 ssh_signal(int signum, sshsig_t handler)
 {
+#ifdef WINDOWS
+	return signal(signum, handler);
+#else
 	struct sigaction sa, osa;
 
 	/* mask all other signals while in handler */
@@ -2517,6 +2520,7 @@ ssh_signal(int signum, sshsig_t handler)
 		return SIG_ERR;
 	}
 	return osa.sa_handler;
+#endif // WINDOWS
 }
 
 int

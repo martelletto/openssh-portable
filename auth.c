@@ -76,10 +76,11 @@
 #include "ssherr.h"
 #include "compat.h"
 #include "channels.h"
-#include "sshfileperm.h"
+
 #ifdef WINDOWS
 #include <Windows.h>
 #include "misc_internal.h"
+#include "sshfileperm.h"
 #endif // WINDOWS
 
 /* import */

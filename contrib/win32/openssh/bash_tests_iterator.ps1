@@ -137,6 +137,7 @@ try
 	$env:TEST_SSH_SCP = $OpenSSHBinPath_shell_fmt+"/scp.exe"
 	$env:BUILDDIR = $BUILDDIR
 	$env:TEST_WINDOWS_SSH = 1
+	$env:TEST_SSH_UNSAFE_PERMISSIONS=1
 	$user = &"$env:windir\system32\whoami.exe"
 	if($user.Contains($env:COMPUTERNAME.ToLower())) {
 		# for local accounts, skip COMPUTERNAME

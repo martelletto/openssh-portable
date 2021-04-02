@@ -735,6 +735,8 @@ fi
 (
 	cat $OBJ/ssh_config
 	if [ "$os" == "windows" ]; then
+		# TODO - having SSH_SK_HELPER is causing issues. Need to find a way.
+		# This is fine for now as we don't have FIDO enabled.
 		echo proxycommand  `windows_path ${SSHD}` -i -f $OBJ_WIN_FORMAT/sshd_proxy
 	else
 		echo proxycommand ${SUDO} env SSH_SK_HELPER=\"$SSH_SK_HELPER\" sh ${SRC}/sshd-log-wrapper.sh ${TEST_SSHD_LOGFILE} ${SSHD} -i -f $OBJ/sshd_proxy
