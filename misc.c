@@ -2640,6 +2640,7 @@ subprocess(const char *tag, const char *command,
 			fatal("posix_spawn initialization failed");
 		else {
 #ifdef WINDOWS
+			extern PSID get_sid(const char*);
 			/* If the user's SID is the System SID and sshd is running as system,
 			 * launch as a child process.
 			 */

@@ -1462,13 +1462,15 @@ process_extended_limits(u_int32_t id)
 	struct sshbuf *msg;
 	int r;
 	uint64_t nfiles = 0;
+#ifdef HAVE_GETRLIMIT
 	struct rlimit rlim;
+#endif
 
 	debug("request %u: limits", id);
-
+#ifdef HAVE_GETRLIMIT
 	if (getrlimit(RLIMIT_NOFILE, &rlim) != -1 && rlim.rlim_cur > 5)
 		nfiles = rlim.rlim_cur - 5; /* stdio(3) + syslog + spare */
-
+#endif
 	if ((msg = sshbuf_new()) == NULL)
 		fatal_f("sshbuf_new failed");
 	if ((r = sshbuf_put_u8(msg, SSH2_FXP_EXTENDED_REPLY)) != 0 ||

@@ -16,7 +16,7 @@
 #define SSH_LOG_H
 
 #include <stdarg.h> /* va_list */
-#include <ssherr.h> /* ssh_err() */
+#include "ssherr.h" /* ssh_err() */
 
 /* Supported syslog facilities and levels. */
 typedef enum {
