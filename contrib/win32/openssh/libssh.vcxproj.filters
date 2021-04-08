@@ -84,6 +84,7 @@
     <ClCompile Include="$(OpenSSH-Src-Path)ssh-sk.c" />
     <ClCompile Include="$(OpenSSH-Src-Path)sshbuf-io.c" />
     <ClCompile Include="..\win32compat\spawn-ext.c" />
+    <ClCompile Include="..\..\..\cipher-chachapoly-libcrypto.c" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(OpenSSH-Src-Path)addrmatch.c">
@@ -129,9 +130,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="$(OpenSSH-Src-Path)compat.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="$(OpenSSH-Src-Path)crc32.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="$(OpenSSH-Src-Path)dh.c">
