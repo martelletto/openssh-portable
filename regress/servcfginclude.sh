@@ -183,6 +183,11 @@ ${SUDO} ${REAL_SSHD} -f $OBJ/sshd_config.i -T \
     -C "host=x,user=test,addr=127.0.0.1" > $OBJ/sshd_config.out || \
 	fail "failed to parse Port after included files"
 _port=`grep -i '^port ' $OBJ/sshd_config.out | awk '{print $2}'`
+
+if [ "$os" == "windows" ]; then
+	_port=`echo $_port | tr -d '\r','\n'`  # remove \r\n
+fi
+
 if test "x7722" != "x$_port" ; then
 	fail "The Port in included file was intertepretted wrongly. Expected 7722, got $_port"
 fi

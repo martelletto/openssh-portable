@@ -372,8 +372,15 @@ fi
 
 make_tmpdir ()
 {
-	SSH_REGRESS_TMP="$($OBJ/mkdtemp openssh-XXXXXXXX)" || \
-	    fatal "failed to create temporary directory"
+	if [ "$os" == "windows" ]; then
+		powershell.exe /c "New-Item -Path $OBJ\openssh-XXXXXXXX -ItemType Directory -Force" >/dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			fatal "failed to create temporary directory"
+		fi
+	else
+		SSH_REGRESS_TMP="$($OBJ/mkdtemp openssh-XXXXXXXX)" || \
+			fatal "failed to create temporary directory"
+	fi
 }
 # End of portable specific functions
 
@@ -413,22 +420,6 @@ stop_sshd ()
 	fi
 }
 
-<<<<<<< HEAD
-make_tmpdir ()
-{
-	if [ "$os" == "windows" ]; then
-		powershell.exe /c "New-Item -Path $OBJ\openssh-XXXXXXXX -ItemType Directory -Force" >/dev/null 2>&1
-		if [ $? -ne 0 ]; then
-			fatal "failed to create temporary directory"
-		fi
-	else
-		SSH_REGRESS_TMP="$($OBJ/mkdtemp openssh-XXXXXXXX)" || \
-			fatal "failed to create temporary directory"
-	fi
-}
-
-=======
->>>>>>> e86968280e358e62649d268d41f698d64d0dc9fa
 # helper
 cleanup ()
 {
