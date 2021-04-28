@@ -522,6 +522,7 @@ cat << EOF > $OBJ/sshd_config
 	Subsystem	sftp	$SFTPSERVER
 EOF
 
+if [ "$os" != "windows" ]; then
 # This may be necessary if /usr/src and/or /usr/obj are group-writable,
 # but if you aren't careful with permissions then the unit tests could
 # be abused to locally escalate privileges.
@@ -552,6 +553,7 @@ bypass this check by setting TEST_SSH_UNSAFE_PERMISSIONS=1
 
 EOD
 	fi
+fi
 fi
 
 if [ ! -z "$TEST_SSH_MODULI_FILE" ]; then
