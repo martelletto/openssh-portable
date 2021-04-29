@@ -5,7 +5,6 @@ branches:
   only:
     - latestw_all
     - hotfix
-    - bagajjal/pull_v8_6
 
 build_script:
   - ps: |
