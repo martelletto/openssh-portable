@@ -43,15 +43,94 @@
 
 /* #define DEBUG_SK 1 */
 
+#ifdef WINDOWS
+static char *
+find_helper(void)
+{
+	char *helper;
+
+	if ((helper = getenv("SSH_SK_HELPER")) == NULL || strlen(helper) == 0)
+		helper = _PATH_SSH_SK_HELPER;
+	if (!path_absolute(helper)) {
+		error_f("helper \"%s\" unusable: path not absolute", helper);
+		return NULL;
+	}
+#if 0
+	if (check_secure_file_permission(helper, NULL, 1) != 0) {
+		error_f("helper \"%s\" unusable: insecure permissions", helper);
+		return NULL;
+	}
+#endif
+	debug_f("using \"%s\" as helper", helper);
+
+	return helper;
+}
+
 static int
 start_helper(int *fdp, pid_t *pidp, void (**osigchldp)(int))
 {
-#ifndef ENABLE_SK
-	/* TODO - This is added temporarily to resolve build errors.
-	 * The below logic has to be converted using posix_internal() APIs as windows doesn't support fork.
-	 */
-	return SSH_ERR_SYSTEM_ERROR;
+	void (*osigchld)(int);
+	int r, pair[2], actions_inited = 0;
+	pid_t pid;
+	char *helper, *av[3], *verbosity = NULL;
+	posix_spawn_file_actions_t actions;
+
+	*fdp = -1;
+	*pidp = 0;
+	*osigchldp = SIG_DFL;
+	r = SSH_ERR_SYSTEM_ERROR;
+	pair[0] = pair[1] = -1;
+
+	if ((helper = find_helper()) == NULL)
+		goto out;
+	osigchld = ssh_signal(SIGCHLD, SIG_DFL);
+	if (socketpair(AF_UNIX, SOCK_STREAM, 0, pair) == -1) {
+		error_f("socketpair: %s", strerror(errno));
+		goto out;
+	}
+	if (posix_spawn_file_actions_init(&actions) != 0) {
+		error_f("posix_spawn_file_actions_init failed");
+		goto out;
+	}
+	actions_inited = 1;
+	if (posix_spawn_file_actions_adddup2(&actions, pair[1],
+	    STDIN_FILENO) != 0 ||
+	    posix_spawn_file_actions_adddup2(&actions, pair[1],
+	    STDOUT_FILENO) != 0) {
+		error_f("posix_spawn_file_actions_adddup2 failed");
+		goto out;
+	}
+#ifdef DEBUG_SK
+	verbosity = "-vvv";
+#endif
+	av[0] = helper;
+	av[1] = verbosity;
+	av[2] = NULL;
+	if (posix_spawnp((pid_t *)&pid, av[0], &actions, NULL, av, NULL) != 0) {
+		error_f("posix_spawnp failed");
+		goto out;
+	}
+	/* success */
+	debug3_f("started pid=%ld", (long)pid);
+	r = 0;
+	*fdp = pair[0];
+	*pidp = pid;
+	*osigchldp = osigchld;
+	pair[0] = -1;
+out:
+	if (pair[0] != -1)
+		close(pair[0]);
+	if (pair[1] != -1)
+		close(pair[1]);
+	if (actions_inited)
+		posix_spawn_file_actions_destroy(&actions);
+
+	return r;
+}
 #else
+static int
+start_helper(int *fdp, pid_t *pidp, void (**osigchldp)(int))
+{
 	void (*osigchld)(int);
 	int oerrno, pair[2];
 	pid_t pid;
@@ -112,8 +191,8 @@ start_helper(int *fdp, pid_t *pidp, void (**osigchldp)(int))
 	*pidp = pid;
 	*osigchldp = osigchld;
 	return 0;
-#endif
 }
+#endif /* WINDOWS */
 
 static int
 reap_helper(pid_t pid)
