@@ -591,7 +591,7 @@ function Start-OpenSSHBuild
 
 function Get-VS2017BuildToolPath
 {
-    $searchPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017\*\MSBuild\15.0\Bin"
+    $searchPath = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\*\MSBuild\*\Bin"
     if($env:PROCESSOR_ARCHITECTURE -ieq "AMD64")
     {
         $searchPath += "\amd64"
