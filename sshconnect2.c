@@ -1248,6 +1248,7 @@ identity_sign(struct identity *id, u_char **sigp, size_t *lenp,
 		}
 		sign_key = prv;
 		if (sshkey_is_sk(sign_key)) {
+#ifndef WINDOWS
 			if ((sign_key->sk_flags &
 			    SSH_SK_USER_VERIFICATION_REQD)) {
  retry_pin:
@@ -1255,6 +1256,7 @@ identity_sign(struct identity *id, u_char **sigp, size_t *lenp,
 				    sshkey_type(sign_key), id->filename);
 				pin = read_passphrase(prompt, 0);
 			}
+#endif
 			if ((sign_key->sk_flags & SSH_SK_USER_PRESENCE_REQD)) {
 				/* XXX should batch mode just skip these? */
 				if ((fp = sshkey_fingerprint(sign_key,
@@ -1271,6 +1273,7 @@ identity_sign(struct identity *id, u_char **sigp, size_t *lenp,
 	if ((r = sshkey_sign(sign_key, sigp, lenp, data, datalen,
 	    alg, options.sk_provider, pin, compat)) != 0) {
 		debug_fr(r, "sshkey_sign");
+#ifndef WINDOWS
 		if (pin == NULL && !retried && sshkey_is_sk(sign_key) &&
 		    r == SSH_ERR_KEY_WRONG_PASSPHRASE) {
 			notify_complete(notifier, NULL);
@@ -1278,6 +1281,7 @@ identity_sign(struct identity *id, u_char **sigp, size_t *lenp,
 			retried = 1;
 			goto retry_pin;
 		}
+#endif
 		goto out;
 	}
 
