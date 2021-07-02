@@ -3615,6 +3615,7 @@ main(int argc, char **argv)
 		}
 		if ((attest = sshbuf_new()) == NULL)
 			fatal("sshbuf_new failed");
+#ifndef WINDOWS
 		if ((sk_flags &
 		    (SSH_SK_USER_VERIFICATION_REQD|SSH_SK_RESIDENT_KEY))) {
 			passphrase = read_passphrase("Enter PIN for "
@@ -3622,6 +3623,9 @@ main(int argc, char **argv)
 		} else {
 			passphrase = NULL;
 		}
+#else
+		passphrase = NULL;
+#endif
 		for (i = 0 ; ; i++) {
 			fflush(stdout);
 			r = sshsk_enroll(type, sk_provider, sk_device,
@@ -3630,6 +3634,9 @@ main(int argc, char **argv)
 			    &private, attest);
 			if (r == 0)
 				break;
+#ifdef WINDOWS
+			fatal_r(r, "Key enrollment failed");
+#else
 			if (r != SSH_ERR_KEY_WRONG_PASSPHRASE)
 				fatal_r(r, "Key enrollment failed");
 			else if (passphrase != NULL) {
@@ -3646,6 +3653,7 @@ main(int argc, char **argv)
 				    "authenticator (again) to authorize "
 				    "key generation.\n");
 			}
+#endif
 		}
 		if (passphrase != NULL) {
 			freezero(passphrase, strlen(passphrase));
